@@ -42,6 +42,11 @@ def main():
         help="type of filesystem, which is also the binary to use to mount it",
     )
     parser.add_argument(
+        "--force",
+        action="store_true",
+        help="force type without testing binary before",
+    )
+    parser.add_argument(
         "extra_args",
         nargs=argparse.ONE_OR_MORE,
         help="arguments to pass to the mount command",
@@ -56,9 +61,10 @@ def main():
             raise ValueError("Cannot find fuse mount binary")
         binary = prog[2:]
     # Test mount binary
-    subprocess.check_call(
-        [binary, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-    )
+    if not args.force:
+        subprocess.check_call(
+            [binary, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
     # Create mountpoint
     mountpoint = None
     with TemporaryDirectory(prefix="ezmount-{0}-".format(binary), dir=".") as td:
