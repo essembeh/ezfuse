@@ -1,22 +1,17 @@
-# Dev tools
-/devenv
-/venv
-
 # Python
 __pycache__
 *.pyc
 /src/*.egg-info/
-/.eggs/
 /build/
 /dist/
+/.eggs/
 
 # Generated
-/flake-report/
-/coverage-report/
-/tests.xml
-/.coverage
+/venv/
+/.tox/
+/.coverage*
 
-# Vscodium
+# IDE
 /.vscode/*
 !/.vscode/settings.json
 

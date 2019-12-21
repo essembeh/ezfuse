@@ -22,39 +22,20 @@ Features:
 
 # Install
 
-Install via `pip`:
-
+Install latest version using pip
 ```sh
-# Install pip for python3
-$ sudo apt install python3-pip
-$ pip install ezfuse
+$ pip3 install --user git+https://github.com/essembeh/ezfuse
 ```
 
-Or you can clone the project and install it via `setup.py`:
-
-```sh
-# Install python3
-$ sudo apt install python3 python3-setuptools
-# Clone repository
-$ git clone https://github.com/essembeh/ezfuse
-$ cd ezfuse
-# If you are in a virtualenv, install it with
-$ python3 setup.py install
-# or use --user if you want to install it in userland
-$ python3 setup.py install --user
-```
-
-To setup a development environment:
-
+Or setup a development environment
 ```sh
 $ git clone https://github.com/essembeh/ezfuse
 $ cd ezfuse
 $ make venv
 $ source venv/bin/activate
-(venv) $ make install # equivalent to ./setup.py install
-(venv) $ make # To run the tests, coverage and flake8
-(venv) $ make watch # to reinstall automatically if you modify the source code
+(venv) $ pip install -e .
 ```
+
 
 # Usage
 

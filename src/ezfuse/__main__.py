@@ -4,10 +4,12 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
+from subprocess import run
 from tempfile import TemporaryDirectory
 
+from pytput import Style, strcolor
+
 from ezfuse import __title__, __version__
-from pytput import tput_print, print_red
 
 COMMMANDS = (
     ("x", "exit"),
@@ -20,10 +22,11 @@ COMMMANDS = (
 
 
 def execute(*command, cwd=None, check_rc=True):
-    cmd = [str(c) for c in command]
-    tput_print("[{label:green}] {cmd:yellow}", label="exec", cmd=" ".join(cmd))
-    fnc = subprocess.check_call if check_rc else subprocess.call
-    fnc(cmd, cwd=None if cwd is None else str(cwd))
+    cmd = list(map(str, command))
+    print(
+        strcolor("[{label:green}] {cmd:yellow}").format(label="exec", cmd=" ".join(cmd))
+    )
+    run(cmd, cwd=None if cwd is None else str(cwd), check=check_rc)
 
 
 def main():
@@ -42,9 +45,7 @@ def main():
         help="type of filesystem, which is also the binary to use to mount it",
     )
     parser.add_argument(
-        "--force",
-        action="store_true",
-        help="force type without testing binary before",
+        "--force", action="store_true", help="force type without testing binary before"
     )
     parser.add_argument(
         "extra_args",
@@ -70,17 +71,21 @@ def main():
     with TemporaryDirectory(prefix="ezmount-{0}-".format(binary), dir=".") as td:
         mountpoint = Path(td)
     mountpoint.mkdir()
-    tput_print(
-        "[{label:green}] Using mountpoint {mnt:blue}", label="info", mnt=mountpoint
+    print(
+        strcolor("[{label:green}] Using mountpoint {mnt:blue}").format(
+            label="info", mnt=mountpoint
+        )
     )
     # Mount
     try:
         execute(binary, *args.extra_args, mountpoint)
     except BaseException as e:
-        print_red("Error while mounting:", e)
+        print(Style.RED.apply("Error while mounting: {0}".format(e)))
         # In case of error, try to remove the mountpoint
-        tput_print(
-            "[{label:green}] Remove mountpoint {mnt:blue}", label="info", mnt=mountpoint
+        print(
+            strcolor("[{label:green}] Remove mountpoint {mnt:blue}").format(
+                label="info", mnt=mountpoint
+            )
         )
         mountpoint.rmdir()
         sys.exit(2)
@@ -91,7 +96,7 @@ def main():
     while True:
         print()
         for cmd, desc in COMMMANDS:
-            tput_print("{cmd:bold}: {desc:dim}", cmd=cmd, desc=desc)
+            print(strcolor("{cmd:bold}: {desc:dim}").format(cmd=cmd, desc=desc))
         action = None
         while action not in actions:
             try:
@@ -119,22 +124,23 @@ def main():
         # Handle end of loop to quit
         if action in ("x", "q"):
             if not mounted:
-                tput_print(
-                    "[{label:green}] Remove mountpoint {mnt:blue}",
-                    label="info",
-                    mnt=mountpoint,
+                print(
+                    strcolor("[{label:green}] Remove mountpoint {mnt:blue}").format(
+                        label="info", mnt=mountpoint,
+                    )
                 )
                 mountpoint.rmdir()
             else:
-                tput_print(
-                    "[{label:green}] Keeping mountpoint {mnt:blue}",
-                    label="info",
-                    mnt=mountpoint,
+                print(
+                    strcolor("[{label:green}] Keeping mountpoint {mnt:blue}").format(
+                        label="info", mnt=mountpoint,
+                    )
                 )
-                tput_print(
-                    "[{label:green}] To umount it run: {cmd:yellow}",
-                    label="info",
-                    cmd="fusermount -u -z {0}; rmdir {0}".format(mountpoint),
+                print(
+                    strcolor("[{label:green}] To umount it run: {cmd:yellow}").format(
+                        label="info",
+                        cmd="fusermount -u -z {0}; rmdir {0}".format(mountpoint),
+                    )
                 )
             sys.exit(0)
 
