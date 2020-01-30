@@ -48,6 +48,11 @@ def main():
         "--force", action="store_true", help="force type without testing binary before"
     )
     parser.add_argument(
+        "--pwd",
+        action="store_true",
+        help="create temporary folder in current directory, default is home folder",
+    )
+    parser.add_argument(
         "extra_args",
         nargs=argparse.ONE_OR_MORE,
         help="arguments to pass to the mount command",
@@ -68,7 +73,10 @@ def main():
         )
     # Create mountpoint
     mountpoint = None
-    with TemporaryDirectory(prefix="ezmount-{0}-".format(binary), dir=".") as td:
+    parent_folder = Path.cwd() if args.pwd else Path.home()
+    with TemporaryDirectory(
+        prefix="ezmount-{0}-".format(binary), dir=str(parent_folder)
+    ) as td:
         mountpoint = Path(td)
     mountpoint.mkdir()
     print(
