@@ -7,7 +7,7 @@ from pathlib import Path
 from subprocess import run
 from tempfile import TemporaryDirectory
 
-from pytput import Style, strcolor
+from pytput import Style, tput_print
 
 from ezfuse import __title__, __version__
 
@@ -23,9 +23,7 @@ COMMMANDS = (
 
 def execute(*command, cwd=None, check_rc=True):
     cmd = list(map(str, command))
-    print(
-        strcolor("[{label:green}] {cmd:yellow}").format(label="exec", cmd=" ".join(cmd))
-    )
+    tput_print("[{label:green}] {cmd:yellow}", label="exec", cmd=" ".join(cmd))
     run(cmd, cwd=None if cwd is None else str(cwd), check=check_rc)
 
 
@@ -79,10 +77,8 @@ def main():
     ) as td:
         mountpoint = Path(td)
     mountpoint.mkdir()
-    print(
-        strcolor("[{label:green}] Using mountpoint {mnt:blue}").format(
-            label="info", mnt=mountpoint
-        )
+    tput_print(
+        "[{label:green}] Using mountpoint {mnt:blue}", label="info", mnt=mountpoint
     )
     # Mount
     try:
@@ -90,10 +86,8 @@ def main():
     except BaseException as e:
         print(Style.RED.apply("Error while mounting: {0}".format(e)))
         # In case of error, try to remove the mountpoint
-        print(
-            strcolor("[{label:green}] Remove mountpoint {mnt:blue}").format(
-                label="info", mnt=mountpoint
-            )
+        tput_print(
+            "[{label:green}] Remove mountpoint {mnt:blue}", label="info", mnt=mountpoint
         )
         mountpoint.rmdir()
         sys.exit(2)
@@ -104,7 +98,7 @@ def main():
     while True:
         print()
         for cmd, desc in COMMMANDS:
-            print(strcolor("{cmd:bold}: {desc:dim}").format(cmd=cmd, desc=desc))
+            tput_print("{cmd:bold}: {desc:dim}", cmd=cmd, desc=desc)
         action = None
         while action not in actions:
             try:
@@ -132,23 +126,22 @@ def main():
         # Handle end of loop to quit
         if action in ("x", "q"):
             if not mounted:
-                print(
-                    strcolor("[{label:green}] Remove mountpoint {mnt:blue}").format(
-                        label="info", mnt=mountpoint,
-                    )
+                tput_print(
+                    "[{label:green}] Remove mountpoint {mnt:blue}",
+                    label="info",
+                    mnt=mountpoint,
                 )
                 mountpoint.rmdir()
             else:
-                print(
-                    strcolor("[{label:green}] Keeping mountpoint {mnt:blue}").format(
-                        label="info", mnt=mountpoint,
-                    )
+                tput_print(
+                    "[{label:green}] Keeping mountpoint {mnt:blue}",
+                    label="info",
+                    mnt=mountpoint,
                 )
-                print(
-                    strcolor("[{label:green}] To umount it run: {cmd:yellow}").format(
-                        label="info",
-                        cmd="fusermount -u -z {0}; rmdir {0}".format(mountpoint),
-                    )
+                tput_print(
+                    "[{label:green}] To umount it run: {cmd:yellow}",
+                    label="info",
+                    cmd="fusermount -u -z {0}; rmdir {0}".format(mountpoint),
                 )
             sys.exit(0)
 
