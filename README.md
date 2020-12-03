@@ -22,18 +22,25 @@ Features:
 
 # Install
 
-Install latest version using pip
+Install from [Pypi](https://pypi.org/project/ezfuse/)
 ```sh
+$ pip3 install --user -U ezfuse
+```
+
+Or install latest version using pip and poetry
+```sh
+$ pip3 install --user -U poetry
 $ pip3 install --user git+https://github.com/essembeh/ezfuse
 ```
 
 Or setup a development environment
 ```sh
+$ pip3 install --user -U poetry
 $ git clone https://github.com/essembeh/ezfuse
 $ cd ezfuse
-$ make venv
-$ source venv/bin/activate
-(venv) $ pip install -e .
+$ poetry install
+$ poetry shell
+(.venv) $ ezfuse --version
 ```
 
 

@@ -1,15 +1,19 @@
+"""
+ezfuse - Quickly mount fuse filesystems in temporary directories
+"""
+
 import argparse
 import os
+import shlex
 import subprocess
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
-from subprocess import run
 from tempfile import TemporaryDirectory
 
-from pytput import Style, tput_print
+from colorama import Fore, Style
 
-from ezfuse import __title__, __version__
+from . import __title__, __version__
 
 COMMMANDS = (
     ("x", "exit"),
@@ -21,20 +25,27 @@ COMMMANDS = (
 )
 
 
-def execute(*command, cwd=None, check_rc=True):
-    cmd = list(map(str, command))
-    tput_print("[{label:green}] {cmd:yellow}", label="exec", cmd=" ".join(cmd))
-    run(cmd, cwd=None if cwd is None else str(cwd), check=check_rc)
+def execute(*command, cwd: Path = None, check_rc: bool = True):
+    """
+    execute a command using a subprocess
+    """
+    command = list(map(str, command))
+    command_txt = " ".join(map(shlex.quote, command))
+    print(f"[exec] {command_txt}")
+    subprocess.run(command, cwd=str(cwd) if cwd else None, check=check_rc)
 
 
-def main():
+def run():
+    """
+    command line entrypoint
+    """
     parser = ArgumentParser(
         prog=__title__, description="Helper to mount temporary folders"
     )
     parser.add_argument(
         "--version",
         action="version",
-        version="{0} version {1}".format(__title__, __version__),
+        version=f"{__title__} version {__version__}",
     )
     parser.add_argument(
         "-t",
@@ -74,20 +85,20 @@ def main():
     parent_folder = Path.cwd() if args.pwd else Path.home()
     with TemporaryDirectory(
         prefix="ezmount-{0}-".format(binary), dir=str(parent_folder)
-    ) as td:
-        mountpoint = Path(td)
+    ) as tempdir:
+        mountpoint = Path(tempdir)
     mountpoint.mkdir()
-    tput_print(
-        "[{label:green}] Using mountpoint {mnt:blue}", label="info", mnt=mountpoint
+    print(
+        f"[{Fore.GREEN}info{Fore.RESET}] Using mountpoint {Fore.BLUE}{mountpoint}{Fore.RESET}",
     )
     # Mount
     try:
         execute(binary, *args.extra_args, mountpoint)
-    except BaseException as e:
-        print(Style.RED.apply("Error while mounting: {0}".format(e)))
+    except BaseException as e:  # pylint: disable=broad-except,invalid-name
+        print(f"{Fore.RED}Error while mounting: {e}{Fore.RESET}")
         # In case of error, try to remove the mountpoint
-        tput_print(
-            "[{label:green}] Remove mountpoint {mnt:blue}", label="info", mnt=mountpoint
+        print(
+            f"[{Fore.GREEN}info{Fore.RESET}] Remove mountpoint {Fore.BLUE}{mountpoint}{Fore.RESET}"
         )
         mountpoint.rmdir()
         sys.exit(2)
@@ -98,7 +109,9 @@ def main():
     while True:
         print()
         for cmd, desc in COMMMANDS:
-            tput_print("{cmd:bold}: {desc:dim}", cmd=cmd, desc=desc)
+            print(
+                f"{Style.BRIGHT}{cmd}{Style.RESET_ALL}: {Style.DIM}{desc}{Style.RESET_ALL}"
+            )
         action = None
         while action not in actions:
             try:
@@ -126,25 +139,16 @@ def main():
         # Handle end of loop to quit
         if action in ("x", "q"):
             if not mounted:
-                tput_print(
-                    "[{label:green}] Remove mountpoint {mnt:blue}",
-                    label="info",
-                    mnt=mountpoint,
+                print(
+                    f"[{Fore.GREEN}info{Fore.RESET}] Remove mountpoint {Fore.BLUE}{mountpoint}{Fore.RESET}",
                 )
                 mountpoint.rmdir()
             else:
-                tput_print(
-                    "[{label:green}] Keeping mountpoint {mnt:blue}",
-                    label="info",
-                    mnt=mountpoint,
+                print(
+                    f"[{Fore.GREEN}info{Fore.RESET}] Keeping mountpoint {Fore.BLUE}{mountpoint}{Fore.RESET}"
                 )
-                tput_print(
-                    "[{label:green}] To umount it run: {cmd:yellow}",
-                    label="info",
-                    cmd="fusermount -u -z {0}; rmdir {0}".format(mountpoint),
+                umount_cmd = f"fusermount -u -z {mountpoint}; rmdir {mountpoint}"
+                print(
+                    f"[{Fore.GREEN}info{Fore.RESET}] To umount it run: {Fore.YELLOW}{umount_cmd}{Fore.RESET}"
                 )
             sys.exit(0)
-
-
-if __name__ == "__main__":
-    main()
