@@ -63,7 +63,7 @@ def run():
     )
     parser.add_argument(
         "extra_args",
-        nargs=argparse.ONE_OR_MORE,
+        nargs=argparse.REMAINDER,
         help="arguments to pass to the mount command",
     )
     args = parser.parse_args()
