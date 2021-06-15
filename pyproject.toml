@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ezfuse"
-version = "1.0.3"
+version = "1.0.4"
 description = "Quickly mount fuse filesystems in temporary directories"
 authors = ["Sébastien MB <seb@essembeh.org>"]
 license = "Apache-2.0"

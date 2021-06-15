@@ -25,14 +25,17 @@ COMMMANDS = (
 )
 
 
-def execute(*command, cwd: Path = None, check_rc: bool = True):
+def execute(*command, cwd: Path = None, check_rc: bool = True, extra_env: dict = None):
     """
     execute a command using a subprocess
     """
     command = list(map(str, command))
     command_txt = " ".join(map(shlex.quote, command))
     print(f"[exec] {command_txt}")
-    subprocess.run(command, cwd=str(cwd) if cwd else None, check=check_rc)
+    env = dict(os.environ)
+    if isinstance(extra_env, dict):
+        env.update(extra_env)
+    subprocess.run(command, cwd=str(cwd) if cwd else None, check=check_rc, env=env)
 
 
 def run():
@@ -134,7 +137,12 @@ def run():
         if action == "o":
             execute("xdg-open", mountpoint)
         elif action == "s":
-            execute(os.getenv("SHELL", "bash"), cwd=mountpoint, check_rc=False)
+            execute(
+                os.getenv("SHELL", "bash"),
+                cwd=mountpoint,
+                check_rc=False,
+                extra_env={"EZMNT": str(mountpoint)},
+            )
 
         # Handle end of loop to quit
         if action in ("x", "q"):
