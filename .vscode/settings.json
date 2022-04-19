@@ -3,10 +3,15 @@
         ".venv/": true,
         "**/__pycache__/": true,
     },
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+        },
+    },
     "python.pythonPath": ".venv/bin/python",
     "python.formatting.provider": "black",
     "editor.formatOnSave": true,
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
-    "python.linting.pylintUseMinimalCheckers": false,
 }

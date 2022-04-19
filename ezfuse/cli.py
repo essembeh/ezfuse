@@ -10,14 +10,15 @@ import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Any, Dict, Optional
 
 from colorama import Fore, Style
 
-from . import __title__, __version__
+from . import __description__, __version__
 
 COMMMANDS = (
-    ("x", "exit"),
     ("q", "umount and exit"),
+    ("x", "exit (and keep mountpoint)"),
     ("o", "xdg-open"),
     ("s", "shell"),
     ("m", "mount"),
@@ -25,11 +26,16 @@ COMMMANDS = (
 )
 
 
-def execute(*command, cwd: Path = None, check_rc: bool = True, extra_env: dict = None):
+def execute(
+    *command,
+    cwd: Optional[Path] = None,
+    check_rc: bool = True,
+    extra_env: Optional[Dict[str, Any]] = None,
+):
     """
     execute a command using a subprocess
     """
-    command = list(map(str, command))
+    command = [str(x) for x in command]
     command_txt = " ".join(map(shlex.quote, command))
     print(f"[exec] {command_txt}")
     env = dict(os.environ)
@@ -42,13 +48,11 @@ def run():
     """
     command line entrypoint
     """
-    parser = ArgumentParser(
-        prog=__title__, description="Helper to mount temporary folders"
-    )
+    parser = ArgumentParser(description=__description__)
     parser.add_argument(
         "--version",
         action="version",
-        version=f"{__title__} version {__version__}",
+        version=f"%(prog)s version {__version__}",
     )
     parser.add_argument(
         "-t",
@@ -75,19 +79,23 @@ def run():
     binary = args.type
     if binary is None:
         prog = Path(sys.argv[0]).name
-        if prog == __title__ or not prog.startswith("ez"):
-            raise ValueError("Cannot find fuse mount binary")
+        if prog == "ezfuse":
+            parser.error("missing -t|--type argument")
+        if not prog.startswith("ez"):
+            raise ValueError(f"Cannot infer fuse type from {prog}")
         binary = prog[2:]
     # Test mount binary
     if not args.force:
         subprocess.check_call(
-            [binary, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            [binary, "--version"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
     # Create mountpoint
     mountpoint = None
     parent_folder = Path.cwd() if args.pwd else Path.home()
     with TemporaryDirectory(
-        prefix="ezmount-{0}-".format(binary), dir=str(parent_folder)
+        prefix=f"ezmount-{binary}-", dir=str(parent_folder)
     ) as tempdir:
         mountpoint = Path(tempdir)
     mountpoint.mkdir()
@@ -118,7 +126,7 @@ def run():
         action = None
         while action not in actions:
             try:
-                action = input("[{0}] ".format("/".join(actions))).strip().lower()
+                action = input(f"[{'/'.join(actions)}] ").strip().lower()
             except (KeyboardInterrupt, EOFError):
                 action = "x"
         print()
