@@ -12,19 +12,16 @@ classifiers = [
 readme = "README.md"
 homepage = "https://github.com/essembeh/ezfuse"
 
-
 [tool.poetry.dependencies]
 python = "^3.8"
-colorama = ""
-
+colorama = "^0.4.6"
 
 [tool.poetry.dev-dependencies]
-black = ""
-pylint = ""
-pytest = ""
-pytest-dotenv = ""
-pytest-cov = ""
-rope = ""
+black = "^22.10.0"
+pylint = "^2.15.5"
+pytest = "^7.2.0"
+pytest-dotenv = "^0.5.2"
+pytest-cov = "^4.0.0"
 
 [tool.poetry.scripts]
 ezfuse = 'ezfuse.cli:run'
