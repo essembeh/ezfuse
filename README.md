@@ -1,6 +1,4 @@
-![Github](https://img.shields.io/github/tag/essembeh/ezfuse.svg)
-![PyPi](https://img.shields.io/pypi/v/ezfuse.svg)
-![Python](https://img.shields.io/pypi/pyversions/ezfuse.svg)
+# ⚰️ This project is now part of [essembeh-tools](https://github.com/essembeh/essembeh-tools)
 
 # EzFuse
 
